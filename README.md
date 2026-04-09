@@ -1,7 +1,9 @@
 # Through The Fire - Proposta di Progetto
 
 **Candidati:** Andrea Bellu, Calvin You
+
 **Corso:** Sistemi Intelligenti
+
 **Anno Accademico:** 2025/2026
 
 ---
