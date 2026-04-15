@@ -8,7 +8,6 @@ DIRECTIONS = {
     "RIGHT": Position(1, 0),
 }
 
-
 def get_successors(current_state: State, grid: List[List[CellType]]) -> List[Tuple[str, State, int]] | None:
     successors = []
 
@@ -20,26 +19,28 @@ def get_successors(current_state: State, grid: List[List[CellType]]) -> List[Tup
 
     # movement
     for action_name, direction in DIRECTIONS.items():
-        print(action_name)
-        print(direction)
-        print(current_state)
+        # print(action_name)
+        # print(direction)
+        # print(current_state)
         new_position = current_state.robot_position + direction
 
         if 0 <= new_position.x < max_x and 0 <= new_position.y < max_y:
-            if grid[new_position.x][new_position.y] != CellType.WALL:
+            print(grid[new_position.x][new_position.y])
+            if grid[new_position.y][new_position.x] != CellType.WALL:
 
                 if current_state.battery > 0:
                     new_state = State(
                         robot_position=new_position,
-                        battery=current_state.battery,
+                        battery=current_state.battery - 1,
                         saved_people=current_state.saved_people,
                         extinguished_fires=current_state.extinguished_fires,
-                        g=current_state.g,
+                        g=current_state.g + 1,
                         h=0  # TODO: heuristic function
                     )
 
-                    cost = 0
+                    cost = 0 # TODO
                     successors.append((action_name, new_state, cost))
 
     # TODO: implement civil rescue logic
-    return None
+
+    return successors
