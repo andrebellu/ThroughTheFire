@@ -4,7 +4,7 @@ from typing import FrozenSet
 
 class CellType(Enum):
     WALL = 0
-    BLOCK = 1
+    EMPTY = 1
     FIRE = 2
     PERSON = 3
     EXTINGUISHER = 4
