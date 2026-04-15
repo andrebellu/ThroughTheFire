@@ -2,7 +2,7 @@ from dataclasses import dataclass
 from enum import Enum
 from typing import FrozenSet
 
-class Type(Enum):
+class CellType(Enum):
     WALL = 0
     BLOCK = 1
     FIRE = 2
