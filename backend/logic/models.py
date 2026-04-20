@@ -22,7 +22,7 @@ class Position:
 class State:
     robot_position: Position
     battery: int
-    saved_people: FrozenSet[int]
+    saved_people: FrozenSet[Position]
     extinguished_fires: FrozenSet[Position]
 
     g: int = 0

@@ -28,7 +28,7 @@ def get_successors(current_state: State, grid: List[List[CellType]], target_pos:
         new_position = current_state.robot_position + direction
 
         if 0 <= new_position.x < max_x and 0 <= new_position.y < max_y:
-            print(grid[new_position.x][new_position.y])
+            # print(grid[new_position.y][new_position.x])
             if grid[new_position.y][new_position.x] != CellType.WALL:
 
                 if current_state.battery > 0:
@@ -38,12 +38,27 @@ def get_successors(current_state: State, grid: List[List[CellType]], target_pos:
                         saved_people=current_state.saved_people,
                         extinguished_fires=current_state.extinguished_fires,
                         g = current_state.g + 1,
-                        h = get_heuristic(new_position, target_pos=new_position)
+                        h = get_heuristic(new_position, target_pos)
                     )
 
-                    cost = 0 # TODO
+                    cost = 1
                     successors.append((action_name, new_state, cost))
 
-    # TODO: implement civil rescue logic
+            if grid[new_position.y][new_position.x] == CellType.PERSON and new_position not in current_state.saved_people:
+                new_saved_people = set(current_state.saved_people)
+                new_saved_people.add(current_state.robot_position)
+
+                new_state = State(
+                    robot_position=current_state.robot_position,
+                    battery=current_state.battery - 5,
+                    saved_people=frozenset(new_saved_people),
+                    extinguished_fires=current_state.extinguished_fires,
+                    g =current_state.g + 1,
+                    h = get_heuristic(current_state.robot_position, target_pos)
+                )
+
+                cost = 1
+                successors.append(("RESCUE", new_state, cost))
+
 
     return successors
