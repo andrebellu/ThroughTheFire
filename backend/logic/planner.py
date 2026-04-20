@@ -8,7 +8,10 @@ DIRECTIONS = {
     "RIGHT": Position(1, 0),
 }
 
-def get_successors(current_state: State, grid: List[List[CellType]]) -> List[Tuple[str, State, int]] | None:
+def get_heuristic(current_pos: Position, target_pos: Position) -> int:
+    return abs(current_pos.x - target_pos.x) + abs(current_pos.y - target_pos.y)
+
+def get_successors(current_state: State, grid: List[List[CellType]], target_pos: Position) -> List[Tuple[str, State, int]]:
     successors = []
 
     if not grid:
@@ -34,8 +37,8 @@ def get_successors(current_state: State, grid: List[List[CellType]]) -> List[Tup
                         battery=current_state.battery - 1,
                         saved_people=current_state.saved_people,
                         extinguished_fires=current_state.extinguished_fires,
-                        g=current_state.g + 1,
-                        h=0  # TODO: heuristic function
+                        g = current_state.g + 1,
+                        h = get_heuristic(new_position, target_pos=new_position)
                     )
 
                     cost = 0 # TODO
