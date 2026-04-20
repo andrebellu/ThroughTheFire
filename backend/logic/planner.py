@@ -44,21 +44,23 @@ def get_successors(current_state: State, grid: List[List[CellType]], target_pos:
                     cost = 1
                     successors.append((action_name, new_state, cost))
 
-            if grid[new_position.y][new_position.x] == CellType.PERSON and new_position not in current_state.saved_people:
-                new_saved_people = set(current_state.saved_people)
-                new_saved_people.add(current_state.robot_position)
+    robot_pos = current_state.robot_position
 
-                new_state = State(
-                    robot_position=current_state.robot_position,
-                    battery=current_state.battery - 5,
-                    saved_people=frozenset(new_saved_people),
-                    extinguished_fires=current_state.extinguished_fires,
-                    g =current_state.g + 1,
-                    h = get_heuristic(current_state.robot_position, target_pos)
-                )
+    if grid[robot_pos.y][robot_pos.x] == CellType.PERSON and robot_pos not in current_state.saved_people:
+        new_saved_people = set(current_state.saved_people)
+        new_saved_people.add(robot_pos)
 
-                cost = 1
-                successors.append(("RESCUE", new_state, cost))
+        new_state = State(
+            robot_position=current_state.robot_position,
+            battery=current_state.battery - 5,
+            saved_people=frozenset(new_saved_people),
+            extinguished_fires=current_state.extinguished_fires,
+            g =current_state.g + 1,
+            h = get_heuristic(current_state.robot_position, target_pos)
+        )
+
+        cost = 1
+        successors.append(("RESCUE", new_state, cost))
 
 
     return successors
