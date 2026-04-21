@@ -13,20 +13,70 @@ export const coloriMinimap = {
   'Fuoco':  '#f97316',
   'Robot':  '#60a5fa',
   'Civile': '#34d399',
+  'Extinguisher': '#ef4444',
   'Arrivo': '#fbbf24',
   'Vuoto':  '#09090b'
 };
 
-export function schemaToMappa(schema: string) {
-  const charMap: Record<string, string> = {
-    '#': 'Muro', 'R': 'Robot', 'F': 'Fuoco',
-    'C': 'Civile', 'A': 'Arrivo', '.': 'Vuoto'
-  };
-  return schema
-    .trim()
-    .split('\n')
-    .map(riga => riga.trim())
-    .filter(riga => riga.length > 0)
-    .flatMap(riga => riga.split('').map(c => charMap[c] ?? 'Vuoto'));
-}
+export const defaultLevels = [
+  {
+    id: 1,
+    nome: 'Through the Smoke',
+    difficolta: 'Easy',
+    coloreDiff: '#34d399',
+    larghezza: 12,
+    altezza: 10,
 
+    schema:
+        `############
+        #R.........#
+        ##########.#
+        #..........#
+        #.##########
+        #....F.....#
+        ##########.#
+        #..........#
+        #.##########
+        #........CA#`
+  },
+  {
+    id: 2,
+    nome: 'Through the Fire',
+    difficolta: 'Medium',
+    coloreDiff: '#facc15',
+    larghezza: 12,
+    altezza: 10,
+
+    schema:
+        `############
+        #R.........#
+        #.###E###.##
+        #.#F.#F.#.C#
+        #.#.###.#..#
+        #........#.#
+        ###.#####.F#
+        #F.#F...#..#
+        #.#.#.##..##
+        #........EA#`
+  },
+  {
+    id: 3,
+    nome: 'Through Hell',
+    difficolta: 'Hard',
+    coloreDiff: '#f87171',
+    larghezza: 12,
+    altezza: 10,
+
+    schema:
+        `############
+        #R#F#F#FE.##
+        #.E...#.#.C#
+        #F#..F#F#.##
+        #.#...#.#..#
+        #F#..F#F#.##
+        #.#...#.#.F#
+        #.#.EF#.##.#
+        #.......#E.#
+        ###.#.###.A#`
+  }
+]

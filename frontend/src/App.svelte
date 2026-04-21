@@ -20,10 +20,17 @@
   });
 
   function caricaLivello(livello) {
+    const expectedSize = livello.larghezza * livello.altezza;
+    if (!Array.isArray(livello.mappaPreview) || livello.mappaPreview.length !== expectedSize) {
+      status = '🔴 Livello non valido';
+      return;
+    }
+
     larghezza       = livello.larghezza;
     altezza         = livello.altezza;
     mappa           = [...livello.mappaPreview];  
     livelloAttivoId = livello.id;
+    status          = `🟢 Livello caricato: ${livello.nome}`;
   }
 
   function nuovaGriglia() {

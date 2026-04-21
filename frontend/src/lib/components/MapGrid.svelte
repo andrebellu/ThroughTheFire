@@ -42,7 +42,7 @@
           if (e.buttons === 1) coloraCella(indice);
           if (e.buttons === 2) cancellaCella(e, indice);
         }}
-per        class="w-10 h-10 md:w-12 md:h-12 border border-zinc-800/80 rounded-md cursor-crosshair transition-all duration-100 flex items-center justify-center text-xl select-none hover:brightness-150 hover:scale-105 active:scale-95 p-0 {strumenti[tipoCella].color}"
+        class="w-10 h-10 md:w-12 md:h-12 border border-zinc-800/80 rounded-md cursor-crosshair transition-all duration-100 flex items-center justify-center text-xl select-none hover:brightness-150 hover:scale-105 active:scale-95 p-0 {strumenti[tipoCella].color}"
         style="">
 
         {#if strumenti[tipoCella].img}
