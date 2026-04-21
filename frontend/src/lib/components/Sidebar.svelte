@@ -28,7 +28,10 @@
 
   <ToolSelector bind:strumentoAttivo />
 
-  <ActionButtons bind:status />
+  <ActionButtons
+    bind:status
+    onClearGrid={nuovaGriglia}
+  />
 </aside>
 
 
