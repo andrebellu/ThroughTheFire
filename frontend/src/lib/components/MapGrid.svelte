@@ -24,11 +24,9 @@
 </script>
 
 <section class="flex-1 h-full bg-zinc-900/30 rounded-2xl border border-zinc-800/50 flex flex-col items-center justify-center p-8 relative overflow-hidden">
-  <!-- Sfondo punteggiato decorativo -->
   <div class="absolute inset-0 opacity-[0.03] pointer-events-none"
        style="background-image: radial-gradient(circle at 2px 2px, white 1px, transparent 0); background-size: 32px 32px;"></div>
 
-  <!-- Griglia principale -->
   <div
     class="grid gap-1 p-3 bg-zinc-950 border border-zinc-800 rounded-xl shadow-2xl z-10"
     style="grid-template-columns: repeat({larghezza}, minmax(0, 1fr));">
@@ -55,7 +53,6 @@
     {/each}
   </div>
 
-  <!-- Info dimensioni -->
   <div class="mt-6 text-zinc-600 font-mono text-xs font-bold tracking-widest uppercase">
     {larghezza}×{Math.ceil(mappa.length / larghezza)} Units // {mappa.length} Celle Totali
   </div>

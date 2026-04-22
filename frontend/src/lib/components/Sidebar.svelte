@@ -11,6 +11,7 @@
   export let status = '🟢 Griglia pulita';
   export let caricaLivello = () => {};
   export let nuovaGriglia = () => {};
+  export let saveInLocalStorage = () => {};
 </script>
 
 <aside class="w-80 shrink-0 h-full overflow-y-auto flex flex-col gap-6 bg-zinc-900/80 backdrop-blur-xl p-6 rounded-2xl border border-zinc-800 shadow-2xl">
@@ -31,6 +32,7 @@
   <ActionButtons
     bind:status
     onClearGrid={nuovaGriglia}
+    onSave={saveInLocalStorage}
   />
 </aside>
 

@@ -15,7 +15,7 @@
     const nuovaDimensione = larghezza * altezza;
     if (mappa.length !== nuovaDimensione) {
       mappa = Array(nuovaDimensione).fill('Vuoto');
-      livelloAttivoId = null;   
+      livelloAttivoId = null;
     }
   });
 
@@ -28,7 +28,7 @@
 
     larghezza       = livello.larghezza;
     altezza         = livello.altezza;
-    mappa           = [...livello.mappaPreview];  
+    mappa           = [...livello.mappaPreview];
     livelloAttivoId = livello.id;
     status          = `🟢 Livello caricato: ${livello.nome}`;
   }
@@ -37,6 +37,30 @@
     mappa           = Array(larghezza * altezza).fill('Vuoto');
     livelloAttivoId = null;
     status          = '🟢 Griglia pulita';
+  }
+
+  function saveInLocalStorage(name) {
+    if (!name || name.trim() === '') {
+      status = '🔴 Nome non valido';
+      return;
+    }
+
+    const toSave = {
+      id: Date.now(),
+      nome: name.trim(),
+      larghezza,
+      altezza,
+      mappaPreview: [...mappa],
+      createdAt: new Date().toISOString()
+    };
+
+    try {
+      console.log('Saving to localStorage:', toSave);
+      localStorage.setItem(`custom_map_${name.trim()}`, JSON.stringify(toSave));
+      status = `🟢 Mappa "${name.trim()}" salvata con successo!`;
+    } catch (e) {
+      status = '🔴 Errore nel salvataggio';
+    }
   }
 </script>
 
@@ -53,6 +77,7 @@
       bind:status
       {caricaLivello}
       {nuovaGriglia}
+      {saveInLocalStorage}
     />
     <MapGrid
       bind:mappa
