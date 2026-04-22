@@ -2,6 +2,7 @@
   import Header from "./lib/components/Header.svelte";
   import Sidebar from "./lib/components/Sidebar.svelte";
   import MapGrid from "./lib/components/MapGrid.svelte";
+  import { appState } from "$lib/runes.svelte.js";
 
   let larghezza = $state(12);
   let altezza   = $state(10);
@@ -10,6 +11,10 @@
   let status = $state('🟢 Griglia pulita');
 
   let mappa = $state([]);
+
+  $effect.pre(() => {
+    loadCustomMapsFromStorage();
+  });
 
   $effect(() => {
     const nuovaDimensione = larghezza * altezza;
@@ -55,15 +60,30 @@
     };
 
     try {
-      console.log('Saving to localStorage:', toSave);
       localStorage.setItem(`custom_map_${name.trim()}`, JSON.stringify(toSave));
       status = `🟢 Mappa "${name.trim()}" salvata con successo!`;
+      loadCustomMapsFromStorage();
     } catch (e) {
       status = '🔴 Errore nel salvataggio';
     }
   }
-</script>
 
+  function loadCustomMapsFromStorage() {
+    const stored = [];
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (key.startsWith('custom_map_')) {
+        try {
+          const data = JSON.parse(localStorage.getItem(key));
+          stored.push(data);
+        } catch (e) {
+          console.error('error');
+        }
+      }
+    }
+    appState.customMaps = stored;
+  }
+</script>
 
 <div class="h-screen w-full bg-zinc-950 text-zinc-100 flex flex-col font-sans selection:bg-orange-500/30">
   <Header />

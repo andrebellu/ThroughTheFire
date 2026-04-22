@@ -3,6 +3,7 @@
   import ToolSelector from './ToolSelector.svelte';
   import ActionButtons from './ActionButtons.svelte';
   import LevelGrid from './LevelGrid.svelte';
+  import { appState } from "$lib/runes.svelte.js";
 
   export let larghezza = 12;
   export let altezza = 10;
