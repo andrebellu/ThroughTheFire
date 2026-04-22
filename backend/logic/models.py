@@ -24,7 +24,8 @@ class State:
     battery: int
     saved_people: FrozenSet[Position]
     extinguished_fires: FrozenSet[Position]
-
+    collected_extinguishers: FrozenSet[Position]
+    extinguisher_charges: int
     g: int = 0
     h: int = 0
 

@@ -22,25 +22,40 @@ def get_successors(current_state: State, grid: List[List[CellType]], target_pos:
 
     # movement
     for action_name, direction in DIRECTIONS.items():
-        # print(action_name)
-        # print(direction)
-        # print(current_state)
         new_position = current_state.robot_position + direction
 
         if 0 <= new_position.x < max_x and 0 <= new_position.y < max_y:
-            # print(grid[new_position.y][new_position.x])
-            if grid[new_position.y][new_position.x] != CellType.WALL:
+            target_cell = grid[new_position.y][new_position.x]
 
-                if current_state.battery > 0:
+            if target_cell != CellType.WALL:
+
+                battery_cost = 1
+                new_charges = current_state.extinguisher_charges
+                new_extinguished = set(current_state.extinguished_fires)
+
+                if target_cell == CellType.FIRE and new_position not in current_state.extinguished_fires:
+                    if current_state.extinguisher_charges > 0:
+                        # Usiamo l'estintore senza danni
+                        new_charges -= 1
+                        new_extinguished.add(new_position)
+                    else:
+                        
+                        battery_cost = 10
+
+                if current_state.battery >= battery_cost:
+                    
                     new_state = State(
                         robot_position=new_position,
-                        battery=current_state.battery - 1,
+                        battery=current_state.battery - battery_cost,
                         saved_people=current_state.saved_people,
-                        extinguished_fires=current_state.extinguished_fires,
-                        g = current_state.g + 1,
-                        h = get_heuristic(new_position, target_pos)
+                        extinguished_fires=frozenset(new_extinguished),
+                        collected_extinguishers=current_state.collected_extinguishers,
+                        extinguisher_charges=new_charges,
+                        g=current_state.g + 1,
+                        h=get_heuristic(new_position, target_pos)
                     )
-
+                    
+                    # ALLINEATI con new_state
                     cost = 1
                     successors.append((action_name, new_state, cost))
 
@@ -62,5 +77,25 @@ def get_successors(current_state: State, grid: List[List[CellType]], target_pos:
         cost = 1
         successors.append(("RESCUE", new_state, cost))
 
+    if grid[robot_pos.y][robot_pos.x] == CellType.EXTINGUISHER and robot_pos not in current_state.collected_extinguishers:
+        
+        new_collected = set(current_state.collected_extinguishers)
+        new_collected.add(robot_pos)
+
+        new_state = State(
+            robot_position=current_state.robot_position,
+            battery=current_state.battery - 1, 
+            saved_people=current_state.saved_people,
+            extinguished_fires=current_state.extinguished_fires,
+            collected_extinguishers=frozenset(new_collected), 
+            extinguisher_charges=current_state.extinguisher_charges + 1, 
+            g=current_state.g + 1,
+            h=get_heuristic(current_state.robot_position, target_pos)
+        )
+
+        cost = 1
+        successors.append(("PICK_EXTINGUISHER", new_state, cost))
 
     return successors
+
+    
