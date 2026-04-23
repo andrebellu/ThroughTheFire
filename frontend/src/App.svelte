@@ -1,89 +1,118 @@
 <script>
-  import svelteLogo from './assets/svelte.svg'
-  import viteLogo from './assets/vite.svg'
-  import heroImg from './assets/hero.png'
-  import Counter from './lib/Counter.svelte'
+  import Header from "./lib/components/Header.svelte";
+  import Sidebar from "./lib/components/Sidebar.svelte";
+  import MapGrid from "./lib/components/MapGrid.svelte";
+  import { appState } from "$lib/runes.svelte.js";
+  import { Toaster } from "$lib/components/ui/sonner/index.js";
+  import {toast} from "svelte-sonner";
+
+  let larghezza = $state(12);
+  let altezza   = $state(10);
+  let strumentoAttivo = $state('Muro');
+  let livelloAttivoId = $state(null);
+  let status = $state('🟢 Griglia pulita');
+
+  let mappa = $state([]);
+
+  $effect.pre(() => {
+    loadCustomMapsFromStorage();
+  });
+
+  $effect(() => {
+    const nuovaDimensione = larghezza * altezza;
+    if (mappa.length !== nuovaDimensione) {
+      mappa = Array(nuovaDimensione).fill('Vuoto');
+      livelloAttivoId = null;
+    }
+  });
+
+  function caricaLivello(livello) {
+    const expectedSize = livello.larghezza * livello.altezza;
+    if (!Array.isArray(livello.mappaPreview) || livello.mappaPreview.length !== expectedSize) {
+      toast.error("map not valid!")
+      return;
+    }
+
+    larghezza       = livello.larghezza;
+    altezza         = livello.altezza;
+    mappa           = [...livello.mappaPreview];
+    livelloAttivoId = livello.id;
+    status          = `🟢 Livello caricato: ${livello.nome}`;
+
+    toast.success("Map loaded");
+  }
+
+  function nuovaGriglia() {
+    mappa           = Array(larghezza * altezza).fill('Vuoto');
+    livelloAttivoId = null;
+    status          = '🟢 Griglia pulita';
+
+    toast.success("Grid cleaned");
+  }
+
+  function saveInLocalStorage(name) {
+    if (!name || name.trim() === '') {
+      toast.warning('Please enter a valid name!');
+      return;
+    }
+
+    const toSave = {
+      id: Date.now(),
+      nome: name.trim(),
+      larghezza,
+      altezza,
+      mappaPreview: [...mappa],
+      createdAt: new Date().toISOString()
+    };
+
+    try {
+      localStorage.setItem(`custom_map_${name.trim()}`, JSON.stringify(toSave));
+      status = `Map "${name.trim()}" saved successfully.`;
+      toast.success(status);
+      loadCustomMapsFromStorage();
+    } catch (e) {
+      status = 'Error saving map!';
+      toast.error(status);
+    }
+  }
+
+  function loadCustomMapsFromStorage() {
+    const stored = [];
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (key.startsWith('custom_map_')) {
+        try {
+          const data = JSON.parse(localStorage.getItem(key));
+          stored.push(data);
+        } catch (e) {
+          console.error('error');
+        }
+      }
+    }
+    appState.customMaps = stored;
+  }
 </script>
 
-<section id="center">
-  <div class="hero">
-    <img src={heroImg} class="base" width="170" height="179" alt="" />
-    <img src={svelteLogo} class="framework" alt="Svelte logo" />
-    <img src={viteLogo} class="vite" alt="Vite logo" />
-  </div>
-  <div>
-    <h1>Get started</h1>
-    <p>Edit <code>src/App.svelte</code> and save to test <code>HMR</code></p>
-  </div>
-  <Counter />
-</section>
+<Toaster position="top-center" />
 
-<div class="ticks"></div>
+<div class="h-screen w-full bg-zinc-950 text-zinc-100 flex flex-col font-sans selection:bg-orange-500/30">
+  <Header />
 
-<section id="next-steps">
-  <div id="docs">
-    <svg class="icon" role="presentation" aria-hidden="true">
-      <use href="/icons.svg#documentation-icon"></use>
-    </svg>
-    <h2>Documentation</h2>
-    <p>Your questions, answered</p>
-    <ul>
-      <li>
-        <a href="https://vite.dev/" target="_blank" rel="noreferrer">
-          <img class="logo" src={viteLogo} alt="" />
-          Explore Vite
-        </a>
-      </li>
-      <li>
-        <a href="https://svelte.dev/" target="_blank" rel="noreferrer">
-          <img class="button-icon" src={svelteLogo} alt="" />
-          Learn more
-        </a>
-      </li>
-    </ul>
-  </div>
-  <div id="social">
-    <svg class="icon" role="presentation" aria-hidden="true">
-      <use href="/icons.svg#social-icon"></use>
-    </svg>
-    <h2>Connect with us</h2>
-    <p>Join the Vite community</p>
-    <ul>
-      <li>
-        <a href="https://github.com/vitejs/vite" target="_blank" rel="noreferrer">
-          <svg class="button-icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#github-icon"></use>
-          </svg>
-          GitHub
-        </a>
-      </li>
-      <li>
-        <a href="https://chat.vite.dev/" target="_blank" rel="noreferrer">
-          <svg class="button-icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#discord-icon"></use>
-          </svg>
-          Discord
-        </a>
-      </li>
-      <li>
-        <a href="https://x.com/vite_js" target="_blank" rel="noreferrer">
-          <svg class="button-icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#x-icon"></use>
-          </svg>
-          X.com
-        </a>
-      </li>
-      <li>
-        <a href="https://bsky.app/profile/vite.dev" target="_blank" rel="noreferrer">
-          <svg class="button-icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#bluesky-icon"></use>
-          </svg>
-          Bluesky
-        </a>
-      </li>
-    </ul>
-  </div>
-</section>
-
-<div class="ticks"></div>
-<section id="spacer"></section>
+  <main class="flex-1 flex px-6 pb-6 gap-6 overflow-hidden">
+    <Sidebar
+      bind:larghezza
+      bind:altezza
+      bind:strumentoAttivo
+      bind:livelloAttivoId
+      bind:status
+      {caricaLivello}
+      {nuovaGriglia}
+      {saveInLocalStorage}
+    />
+    <MapGrid
+      bind:mappa
+      {larghezza}
+      {strumentoAttivo}
+    />
+  </main>
+</div>
