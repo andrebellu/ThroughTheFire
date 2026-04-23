@@ -3,6 +3,8 @@
   import Sidebar from "./lib/components/Sidebar.svelte";
   import MapGrid from "./lib/components/MapGrid.svelte";
   import { appState } from "$lib/runes.svelte.js";
+  import { Toaster } from "$lib/components/ui/sonner/index.js";
+  import {toast} from "svelte-sonner";
 
   let larghezza = $state(12);
   let altezza   = $state(10);
@@ -27,7 +29,7 @@
   function caricaLivello(livello) {
     const expectedSize = livello.larghezza * livello.altezza;
     if (!Array.isArray(livello.mappaPreview) || livello.mappaPreview.length !== expectedSize) {
-      status = '🔴 Livello non valido';
+      toast.error("map not valid!")
       return;
     }
 
@@ -36,17 +38,21 @@
     mappa           = [...livello.mappaPreview];
     livelloAttivoId = livello.id;
     status          = `🟢 Livello caricato: ${livello.nome}`;
+
+    toast.success("Map loaded");
   }
 
   function nuovaGriglia() {
     mappa           = Array(larghezza * altezza).fill('Vuoto');
     livelloAttivoId = null;
     status          = '🟢 Griglia pulita';
+
+    toast.success("Grid cleaned");
   }
 
   function saveInLocalStorage(name) {
     if (!name || name.trim() === '') {
-      status = '🔴 Nome non valido';
+      toast.warning('Please enter a valid name!');
       return;
     }
 
@@ -61,10 +67,12 @@
 
     try {
       localStorage.setItem(`custom_map_${name.trim()}`, JSON.stringify(toSave));
-      status = `🟢 Mappa "${name.trim()}" salvata con successo!`;
+      status = `Map "${name.trim()}" saved successfully.`;
+      toast.success(status);
       loadCustomMapsFromStorage();
     } catch (e) {
-      status = '🔴 Errore nel salvataggio';
+      status = 'Error saving map!';
+      toast.error(status);
     }
   }
 
@@ -84,6 +92,8 @@
     appState.customMaps = stored;
   }
 </script>
+
+<Toaster position="top-center" />
 
 <div class="h-screen w-full bg-zinc-950 text-zinc-100 flex flex-col font-sans selection:bg-orange-500/30">
   <Header />
