@@ -13,6 +13,7 @@
   export let caricaLivello = () => {};
   export let nuovaGriglia = () => {};
   export let saveInLocalStorage = () => {};
+  export let pythonSolve = () => {};
 </script>
 
 <aside class="w-80 shrink-0 h-full overflow-y-auto flex flex-col gap-6 bg-zinc-900/80 backdrop-blur-xl p-6 rounded-2xl border border-zinc-800 shadow-2xl">
@@ -34,6 +35,7 @@
     bind:status
     onClearGrid={nuovaGriglia}
     onSave={saveInLocalStorage}
+    onSolve={pythonSolve}
   />
 </aside>
 

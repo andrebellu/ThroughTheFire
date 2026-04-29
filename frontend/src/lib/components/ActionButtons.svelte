@@ -3,7 +3,7 @@
     import { toast } from "svelte-sonner";
     import {Input} from "$lib/components/ui/input/index.js";
 
-    let {status, onClearGrid, onSave} = $props();
+    let {status, onClearGrid, onSave, onSolve} = $props();
 
     let name = $state('');
     let dialogOpen = $state(false);
@@ -12,7 +12,9 @@
         onClearGrid();
     }
 
-    function handleSolve() {}
+    function handleSolve() {
+        onSolve();
+    }
 
     function handleSalva() {
         console.log('handleSalva called with name:', name);

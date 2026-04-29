@@ -1,4 +1,4 @@
-from models import Position, State, CellType
+from .models import Position, State, CellType
 from typing import List, Set, Tuple
 
 DIRECTIONS = {

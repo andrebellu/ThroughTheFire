@@ -1,4 +1,4 @@
-from models import CellType, Position, State
+from .models import CellType, Position, State
 from typing import List, Tuple
 
 def parse_map(raw_map: List[str], initial_battery: int = 100) -> Tuple[List[List[CellType]], State, Position]:
@@ -11,7 +11,6 @@ def parse_map(raw_map: List[str], initial_battery: int = 100) -> Tuple[List[List
         'E': CellType.EXTINGUISHER,
         '.': CellType.EMPTY
     }
-
 
     grid = []           
     robot_pos = None    

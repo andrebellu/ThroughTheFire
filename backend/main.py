@@ -2,6 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import List
+from .logic import parser
 
 origins = [
     "http://localhost",
@@ -21,7 +22,7 @@ app.add_middleware(
 class MapData(BaseModel):
     w: int
     h: int
-    grid: List[List[int]]
+    grid: List[str]
 
 @app.get("/")
 async def root():
@@ -30,9 +31,12 @@ async def root():
 
 @app.post("/solve")
 async def solve_task(data: MapData):
+    raw_map = parser.parse_map(data.grid)
     print(f"map {data.w}x{data.h}")
+
     return {
+        "success": True,
         "status": "success",
-        "plan": ["ciao", "ciao", "ciao"],
+        "plan": ["giù", "destra", "sinistra"],
         "message": "ok",
     }

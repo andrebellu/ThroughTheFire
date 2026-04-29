@@ -12,6 +12,8 @@
   let livelloAttivoId = $state(null);
   let status = $state('🟢 Griglia pulita');
 
+  const endpoint = "http://localhost:8000/solve";
+
   let mappa = $state([]);
 
   $effect.pre(() => {
@@ -91,6 +93,32 @@
     }
     appState.customMaps = stored;
   }
+
+  function pythonSolve(){
+    fetch(endpoint, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        w: larghezza,
+        h: altezza,
+        grid: mappa
+      })
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.success) {
+        toast.success("Solution found!");
+      } else {
+        toast.error("No solution found.");
+      }
+    })
+    .catch(error => {
+      console.error('Error:', error);
+      toast.error("Error connecting to solver.");
+    });
+  }
 </script>
 
 <Toaster position="top-center" />
@@ -108,6 +136,7 @@
       {caricaLivello}
       {nuovaGriglia}
       {saveInLocalStorage}
+      {pythonSolve}
     />
     <MapGrid
       bind:mappa
