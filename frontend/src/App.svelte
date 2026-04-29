@@ -12,6 +12,11 @@
   let livelloAttivoId = $state(null);
   let status = $state('🟢 Griglia pulita');
 
+  let plan = $state([]);
+  let currentStep = $state(0);
+  let isPlataforma = $state(false);
+  let mapSnapshot = $state([]);
+
   const endpoint = "http://localhost:8000/solve";
 
   let mappa = $state([]);
@@ -94,8 +99,9 @@
     appState.customMaps = stored;
   }
 
-  function pythonSolve(){
-    fetch(endpoint, {
+  async function pythonSolve() {
+    try {
+      const response = await fetch(endpoint, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
@@ -105,19 +111,29 @@
         h: altezza,
         grid: mappa
       })
-    })
-    .then(response => response.json())
-    .then(data => {
+      });
+
+      if (!response.ok) {
+        plan = [];
+        toast.error("Error connecting to solver.");
+        return;
+      }
+
+      const data = await response.json();
+
       if (data.success) {
+        plan = data.plan ?? [];
+        console.log(plan);
         toast.success("Solution found!");
       } else {
+        plan = [];
         toast.error("No solution found.");
       }
-    })
-    .catch(error => {
+    } catch (error) {
       console.error('Error:', error);
+      plan = [];
       toast.error("Error connecting to solver.");
-    });
+    }
   }
 </script>
 
