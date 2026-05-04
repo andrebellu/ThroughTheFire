@@ -1,26 +1,24 @@
 <script>
-  import Header from "./lib/components/Header.svelte";
-  import Sidebar from "./lib/components/Sidebar.svelte";
-  import MapGrid from "./lib/components/MapGrid.svelte";
-  import {appState} from "$lib/runes.svelte.js";
-  import {Toaster} from "$lib/components/ui/sonner/index.js";
-  import {toast} from "svelte-sonner";
+    import Header from "./lib/components/Header.svelte";
+    import Sidebar from "./lib/components/Sidebar.svelte";
+    import MapGrid from "./lib/components/MapGrid.svelte";
+    import {appState} from "$lib/runes.svelte.js";
+    import {Toaster} from "$lib/components/ui/sonner/index.js";
+    import {toast} from "svelte-sonner";
 
-  const ENDPOINT = "http://localhost:8000/solve";
+    const ENDPOINT = "http://localhost:8000/solve";
     let larghezza = $state(12);
     let altezza = $state(10);
     let strumentoAttivo = $state('Muro');
     let livelloAttivoId = $state(null);
     let status = $state('🟢 Griglia pulita');
 
-    let plan = $state([]);
     let currentStep = $state(-1);
-    let isPlataform = $state(false);
-    let mapSnapshot = $state([]);
     let isPlaying = $state(false);
     let playbackSpeed = $state(500);
     let robotPos = $state(-1);
     let planSteps = $state([]);
+    let visitedCells = $state([]);
 
     let mappa = $state([]);
 
@@ -46,6 +44,7 @@
         larghezza = livello.larghezza;
         altezza = livello.altezza;
         mappa = [...livello.mappaPreview];
+        visitedCells = [];
         livelloAttivoId = livello.id;
         status = `🟢 Livello caricato: ${livello.nome}`;
 
@@ -56,6 +55,8 @@
         mappa = Array(larghezza * altezza).fill('Vuoto');
         livelloAttivoId = null;
         status = '🟢 Griglia pulita';
+        // clear visited trail
+        visitedCells = [];
 
         toast.success("Grid cleaned");
     }
@@ -122,6 +123,8 @@
 
             if (newPos >= 0 && newPos < mappa.length && mappa[newPos] !== 'Muro') {
                 if (robotPos >= 0 && robotPos < mappa.length) {
+                    // mark current cell as visited before moving
+                    if (!visitedCells.includes(robotPos)) visitedCells = [...visitedCells, robotPos];
                     mappa[robotPos] = 'Vuoto';
                 }
                 mappa[newPos] = 'Robot';
@@ -250,6 +253,7 @@
                 {larghezza}
                 {robotPos}
                 {strumentoAttivo}
+                {visitedCells}
         />
     </main>
 </div>

@@ -1,9 +1,10 @@
 <script>
   import { strumenti } from '../constants.ts';
 
-  let { mappa, larghezza, strumentoAttivo = 'Muro', isPlaying = false} = $props();
+  let { mappa, larghezza, strumentoAttivo = 'Muro', isPlaying = false, robotPos = -1, visitedCells = [] } = $props();
 
   function coloraCella(indice) {
+    if (isPlaying) return;
     if (strumentoAttivo === 'Robot') {
       const old = mappa.findIndex(c => c === 'Robot');
       if (old !== -1) mappa[old] = 'Vuoto';
@@ -16,8 +17,13 @@
   }
 
   function cancellaCella(evento, indice) {
+    if (isPlaying) return;
     evento.preventDefault();
     mappa[indice] = 'Vuoto';
+  }
+
+  function isVisited(indice) {
+    return visitedCells.includes(indice);
   }
 </script>
 
@@ -37,6 +43,7 @@
           onclick={() => coloraCella(indice)}
           oncontextmenu={(e) => cancellaCella(e, indice)}
           onmouseenter={(e) => {
+            if (isPlaying) return;
             if (e.buttons === 1) coloraCella(indice);
             if (e.buttons === 2) cancellaCella(e, indice);
           }}
@@ -52,6 +59,10 @@
           {:else if strumenti[tipoCella].icon}
             <span class="flex items-center justify-center w-full h-full">{strumenti[tipoCella].icon}</span>
           {/if}
+
+          {#if isVisited(indice) && indice !== robotPos}
+            <span class="absolute w-2 h-2 rounded-full bg-white shadow-[0_0_6px_rgba(255,255,255,0.8)]"></span>
+          {/if}
         </button>
       </div>
     {/each}
@@ -59,6 +70,5 @@
 
   <div class="mt-6 text-zinc-600 font-mono text-xs font-bold tracking-widest uppercase">
     {larghezza}×{Math.ceil(mappa.length / larghezza)} Units // {mappa.length} Celle Totali
-    {isPlaying}
   </div>
 </section>

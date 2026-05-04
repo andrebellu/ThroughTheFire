@@ -1,10 +1,10 @@
 <script>
-  import GridDimensions from './GridDimensions.svelte';
-  import ToolSelector from './ToolSelector.svelte';
-  import ActionButtons from './ActionButtons.svelte';
-  import LevelGrid from './LevelGrid.svelte';
+    import GridDimensions from './GridDimensions.svelte';
+    import ToolSelector from './ToolSelector.svelte';
+    import ActionButtons from './ActionButtons.svelte';
+    import LevelGrid from './LevelGrid.svelte';
 
-  export let larghezza = 12;
+    export let larghezza = 12;
     export let altezza = 10;
     export let strumentoAttivo = 'Muro';
     export let livelloAttivoId = null;
