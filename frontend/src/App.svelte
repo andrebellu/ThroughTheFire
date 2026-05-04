@@ -15,17 +15,12 @@
 
     let plan = $state([]);
     let currentStep = $state(-1);
-    let isPlataforma = $state(false);
+    let isPlataform = $state(false);
     let mapSnapshot = $state([]);
     let isPlaying = $state(false);
     let playbackSpeed = $state(500);
     let robotPos = $state(-1);
-
     let planSteps = $state([]);
-
-    function findRobotIndex(map) {
-        return map.findIndex(c => c === 'Robot');
-    }
 
     let mappa = $state([]);
 
@@ -107,7 +102,91 @@
         appState.customMaps = stored;
     }
 
+    function findRobotIndex(map) {
+        return map.findIndex(c => c === 'Robot');
+    }
+
+    function executeStep(step) {
+        if (!isPlaying || !step) {
+            return;
+        }
+
+        if (step.action === 'move') {
+            const dir = step.direction;
+            let newPos = robotPos;
+
+            if (dir === 'up') newPos -= larghezza;
+            else if (dir === 'down') newPos += larghezza;
+            else if (dir === 'left') newPos -= 1;
+            else if (dir === 'right') newPos += 1;
+
+            if (newPos >= 0 && newPos < mappa.length && mappa[newPos] !== 'Muro') {
+                if (robotPos >= 0 && robotPos < mappa.length) {
+                    mappa[robotPos] = 'Vuoto';
+                }
+                mappa[newPos] = 'Robot';
+                robotPos = newPos;
+            }
+        } else if (step.action === 'extinguish') {
+            // logica per estinguere eventuale fuoco nella cella attuale o adiacente
+        }
+
+        currentStep += 1;
+        setTimeout(runPlan, playbackSpeed);
+    }
+
     function runPlan() {
+        if (!isPlaying) {
+            return;
+        }
+
+        const nextIndex = currentStep + 1;
+
+        if (nextIndex >= planSteps.length) {
+            isPlaying = false;
+            status = 'Plan completed!';
+            toast.success(status);
+            return;
+        }
+
+        const step = planSteps[nextIndex];
+        executeStep(step);
+    }
+
+    function normalizeDirection(direction) {
+        if (!direction) return null;
+        const value = String(direction).trim().toLowerCase();
+        if (value === 'up' || value === 'su') return 'up';
+        if (value === 'down' || value === 'giu' || value === 'giu\u0300' || value === 'giù') return 'down';
+        if (value === 'left' || value === 'sinistra') return 'left';
+        if (value === 'right' || value === 'destra') return 'right';
+        return null;
+    }
+
+    function normalizePlanSteps(rawSteps) {
+        if (!Array.isArray(rawSteps)) return [];
+
+        return rawSteps
+            .map((step) => {
+                if (typeof step === 'string') {
+                    const dir = normalizeDirection(step);
+                    return dir ? {action: 'move', direction: dir} : null;
+                }
+
+                if (step && typeof step === 'object') {
+                    const action = String(step.action || '').trim().toLowerCase();
+                    if (action === 'move') {
+                        const dir = normalizeDirection(step.direction);
+                        return dir ? {action: 'move', direction: dir} : null;
+                    }
+                    if (action === 'extinguish') {
+                        return {action: 'extinguish'};
+                    }
+                }
+
+                return null;
+            })
+            .filter(Boolean);
     }
 
     async function pythonSolve() {
@@ -121,9 +200,18 @@
             const data = await resp.json();
 
             if (data.success && Array.isArray(data.plan)) {
-                planSteps = data.plan;
+                planSteps = normalizePlanSteps(data.plan);
                 const idx = findRobotIndex(mappa);
-                robotPos = {index: idx !== -1 ? idx : 0};
+                if (idx === -1) {
+                    toast.error("No robot found on map.");
+                    return;
+                }
+                if (planSteps.length === 0) {
+                    toast.error("Plan format not supported.");
+                    return;
+                }
+
+                robotPos = idx;
                 currentStep = -1;
                 isPlaying = true;
                 runPlan();
@@ -136,16 +224,6 @@
             console.error(e);
         }
     }
-
-    planSteps = [
-        {action: 'move', direction: 'right'},
-        {action: 'move', direction: 'down'},
-        {action: 'move', direction: 'down'},
-        {action: 'move', direction: 'right'},
-        {action: 'move', direction: 'up'},
-        {action: 'move', direction: 'down'},
-        {action: 'extinguish'}
-    ]; // dati a caso per testare movimento robottino
 </script>
 
 <Toaster position="top-center"/>
@@ -161,13 +239,16 @@
                 bind:status
                 bind:strumentoAttivo
                 {caricaLivello}
+                {isPlaying}
                 {nuovaGriglia}
                 {pythonSolve}
                 {saveInLocalStorage}
         />
         <MapGrid
                 bind:mappa
+                {isPlaying}
                 {larghezza}
+                {robotPos}
                 {strumentoAttivo}
         />
     </main>
