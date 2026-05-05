@@ -1,4 +1,4 @@
-import search_problem as SearchProblem
+from .search_problem import SearchProblem
 
 class Node:
     def __init__(self, state, parent = None, action = None, g = 0) -> None:

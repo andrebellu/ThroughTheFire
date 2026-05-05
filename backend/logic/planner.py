@@ -1,5 +1,21 @@
 from .models import Position, State, CellType
 from typing import List, Set, Tuple
+from .search_problem import SearchProblem
+from dataclasses import replace
+
+
+class RescueProblem(SearchProblem):
+    def __init__(self, init: State, goal: Position, grid: list[list[CellType]], cost: dict = None):
+        if cost is None:
+            cost = {"move": 1, "rescue": 1}
+
+        super().__init__(init, goal, cost)
+        self.grid = grid
+        self.height = len(grid)
+        self.width = len(grid[0]) if self.height > 0 else 0
+
+        def isGoal(self, state) -> bool:
+            return self.goal in state.saved_people
 
 DIRECTIONS = {
     "UP": Position(0, -1),
@@ -39,11 +55,11 @@ def get_successors(current_state: State, grid: List[List[CellType]], target_pos:
                         new_charges -= 1
                         new_extinguished.add(new_position)
                     else:
-                        
+
                         battery_cost = 10
 
                 if current_state.battery >= battery_cost:
-                    
+
                     new_state = State(
                         robot_position=new_position,
                         battery=current_state.battery - battery_cost,
@@ -54,8 +70,7 @@ def get_successors(current_state: State, grid: List[List[CellType]], target_pos:
                         g=current_state.g + 1,
                         h=get_heuristic(new_position, target_pos)
                     )
-                    
-                    # ALLINEATI con new_state
+
                     cost = 1
                     successors.append((action_name, new_state, cost))
 
@@ -78,17 +93,17 @@ def get_successors(current_state: State, grid: List[List[CellType]], target_pos:
         successors.append(("RESCUE", new_state, cost))
 
     if grid[robot_pos.y][robot_pos.x] == CellType.EXTINGUISHER and robot_pos not in current_state.collected_extinguishers:
-        
+
         new_collected = set(current_state.collected_extinguishers)
         new_collected.add(robot_pos)
 
         new_state = State(
             robot_position=current_state.robot_position,
-            battery=current_state.battery - 1, 
+            battery=current_state.battery - 1,
             saved_people=current_state.saved_people,
             extinguished_fires=current_state.extinguished_fires,
-            collected_extinguishers=frozenset(new_collected), 
-            extinguisher_charges=current_state.extinguisher_charges + 1, 
+            collected_extinguishers=frozenset(new_collected),
+            extinguisher_charges=current_state.extinguisher_charges + 1,
             g=current_state.g + 1,
             h=get_heuristic(current_state.robot_position, target_pos)
         )
@@ -98,4 +113,4 @@ def get_successors(current_state: State, grid: List[List[CellType]], target_pos:
 
     return successors
 
-    
+

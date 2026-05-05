@@ -1,6 +1,6 @@
-from search_algorithm import SearchAlgorithm
+from .search_algorithm import SearchAlgorithm
 from queue import PriorityQueue
-from search_algorithm import Node
+from .search_algorithm import Node
 
 class AstarNode(Node):
     def __init__(self, state, parent = None, action = None, g = 0, h = 0) -> None:
