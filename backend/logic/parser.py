@@ -1,43 +1,39 @@
 from .models import CellType, Position, State
 from typing import List, Tuple
 
-def parse_map(raw_map: List[str], initial_battery: int = 100) -> Tuple[List[List[CellType]], State, Position]:
-    
-    char_to_cell = {
-        '#': CellType.WALL,
-        'F': CellType.FIRE,
-        'C': CellType.PERSON,
-        'A': CellType.GOAL,
-        'E': CellType.EXTINGUISHER,
-        '.': CellType.EMPTY
-    }
+SVELTE_TO_PYTHON = {
+    'Muro': CellType.WALL,
+    'Vuoto': CellType.EMPTY,
+    'Fuoco': CellType.FIRE,
+    'Civile': CellType.PERSON,
+    'Robot': CellType.EMPTY,         # cella sotto il robot è vuota, la sua pos va nello stato
+    'Extinguisher': CellType.EMPTY,  # !TODO da implementare logica
+    'Arrivo': CellType.EMPTY         # !TODO da implementare logica
+}
 
+def parse_map(raw_map: List[str], initial_battery: int = 100, larghezza: int = None, altezza: int = None) -> Tuple[List[List[CellType]], State, Position]:
     grid = []           
     robot_pos = None    
     target_pos = None   
 
-    #Scanner mappa
-    #y sarà il numero della riga (0, 1, 2...) e row sarà il testo (es: "#R......#").
-    for y, row in enumerate(raw_map):
+    for y in range(altezza):
         
-        grid_row = []
+        row = []
         
-        # 'x' sarà la colonna (0, 1, 2...) e 'char' sarà la lettera (es: 'R').
-        for x, char in enumerate(row):
+        for x in range(larghezza):
+            idx = y * larghezza + x
+            svelte_cell = raw_map[idx]
             
-            if char == 'R':
-                robot_pos = Position(x, y)
-                grid_row.append(CellType.EMPTY) 
-                
-            elif char == 'A':
-                target_pos = Position(x, y)
-                grid_row.append(CellType.GOAL)
-                
-            else:
-                cell_type = char_to_cell.get(char, CellType.EMPTY)
-                grid_row.append(cell_type)
-                
-        grid.append(grid_row)
+            pos= Position(x, y)
+            if svelte_cell == "Robot":
+                robot_pos = pos
+            elif svelte_cell == 'Civile':
+                target_pos = pos
+
+            cell_type = SVELTE_TO_PYTHON.get(svelte_cell)
+            row.append(cell_type)
+
+        grid.append(row)
 
     if robot_pos is None or target_pos is None:
         raise ValueError("ERRORE : La mappa è incompleta. Inserire il robot e il punto d'arrivo")

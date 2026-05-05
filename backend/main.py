@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import List
-from .logic import parser
+from .logic.parser import parse_map
 
 origins = [
     "http://localhost",
@@ -31,8 +31,17 @@ async def root():
 
 @app.post("/solve")
 async def solve_task(data: MapData):
-    raw_map = parser.parse_map(data.grid)
     print(f"map {data.w}x{data.h}")
+
+    grid, initial_state, target_pos = parse_map(
+        data.grid,
+        initial_battery=100,
+        larghezza=data.w,
+        altezza=data.h
+    )
+
+    print(f"Posizione Iniziale Robot: {initial_state.robot_position}")
+    print(f"Target Civile in: {target_pos}")
 
     return {
         "success": True,
