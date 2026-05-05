@@ -39,7 +39,7 @@ def manhattan_heuristic(state, goal_pos):
 async def solve_task(data: MapData):
     print(f"map {data.w}x{data.h}")
 
-    grid, initial_state, target_pos = parse_map(
+    grid, initial_state, target_pos, civilians = parse_map(
         data.grid,
         initial_battery=100,
         larghezza=data.w,
@@ -48,8 +48,9 @@ async def solve_task(data: MapData):
 
     print(f"Posizione Iniziale Robot: {initial_state.robot_position}")
     print(f"Target Civile in: {target_pos}")
+    print(f"Civili Totali: {civilians}")
 
-    problem = RescueProblem(init=initial_state, goal=target_pos, grid=grid)
+    problem = RescueProblem(init=initial_state, goal=target_pos, grid=grid, total_civilians=civilians)
 
     solver = AStar(heuristic=manhattan_heuristic)
 

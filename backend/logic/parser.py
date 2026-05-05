@@ -7,14 +7,14 @@ SVELTE_TO_PYTHON = {
     'Fuoco': CellType.FIRE,
     'Civile': CellType.PERSON,
     'Robot': CellType.EMPTY,         # cella sotto il robot è vuota, la sua pos va nello stato
-    'Extinguisher': CellType.EMPTY,  # !TODO da implementare logica
-    'Arrivo': CellType.EMPTY         # !TODO da implementare logica
+    'Extinguisher': CellType.EXTINGUISHER,  
+    'Arrivo': CellType.GOAL         # !TODO da implementare logica
 }
 
 def parse_map(raw_map: List[str], initial_battery: int = 100, larghezza: int = None, altezza: int = None) -> Tuple[List[List[CellType]], State, Position]:
     grid = []           
-    robot_pos = None    
-    target_pos = None   
+    exit_pos = None    
+    civilians = set()   
 
     for y in range(altezza):
         
@@ -28,14 +28,16 @@ def parse_map(raw_map: List[str], initial_battery: int = 100, larghezza: int = N
             if svelte_cell == "Robot":
                 robot_pos = pos
             elif svelte_cell == 'Civile':
-                target_pos = pos
+                civilians.add(pos)
+            elif svelte_cell == 'Arrivo':
+                exit_pos = pos
 
             cell_type = SVELTE_TO_PYTHON.get(svelte_cell)
             row.append(cell_type)
 
         grid.append(row)
 
-    if robot_pos is None or target_pos is None:
+    if robot_pos is None or exit_pos is None:
         raise ValueError("ERRORE : La mappa è incompleta. Inserire il robot e il punto d'arrivo")
 
     
@@ -50,4 +52,4 @@ def parse_map(raw_map: List[str], initial_battery: int = 100, larghezza: int = N
         h=0                                 
     )
 
-    return grid, initial_state, target_pos
+    return grid, initial_state, exit_pos, len(civilians)
