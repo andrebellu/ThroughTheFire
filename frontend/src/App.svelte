@@ -5,6 +5,7 @@
     import {appState} from "$lib/runes.svelte.js";
     import {Toaster} from "$lib/components/ui/sonner/index.js";
     import {toast} from "svelte-sonner";
+    import PlaybackBar from "./lib/components/PlaybackBar.svelte";
 
     const ENDPOINT = "http://localhost:8000/solve";
     let larghezza = $state(12);
@@ -12,6 +13,7 @@
     let strumentoAttivo = $state('Muro');
     let livelloAttivoId = $state(null);
     let status = $state('🟢 Griglia pulita');
+    let batteriaCorrente = $state(100);
 
     let currentStep = $state(-1);
     let isPlaying = $state(false);
@@ -247,13 +249,20 @@
                 {pythonSolve}
                 {saveInLocalStorage}
         />
-        <MapGrid
-                bind:mappa
-                {isPlaying}
-                {larghezza}
-                {robotPos}
-                {strumentoAttivo}
-                {visitedCells}
-        />
+        <div class="flex-1 flex flex-col min-w-0 h-full">
+            <MapGrid
+                    bind:mappa
+                    {isPlaying}
+                    {larghezza}
+                    {robotPos}
+                    {strumentoAttivo}
+                    {visitedCells}
+            />
+
+            <PlaybackBar
+                    {batteriaCorrente}
+                    {status}
+            />
+        </div>
     </main>
 </div>
