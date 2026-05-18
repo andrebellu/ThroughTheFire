@@ -34,7 +34,7 @@ export const defaultLevels = [
         #.####.F.#
         #C.....E.#
         #......F.#
-        #########A`
+        ########.A`
   },
   {
     id: 2,
