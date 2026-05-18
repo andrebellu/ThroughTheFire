@@ -5,7 +5,7 @@ from dataclasses import replace
 
 
 class RescueProblem(SearchProblem):
-    def __init__(self, init: State, goal: Position, grid: list[list[CellType]],total_civilians: int,cost: dict = None):
+    def __init__(self, init: State, goal: Position, grid: list[list[CellType]],total_civilians: int,cost: dict = None, oxygen_drain_per_civilian: int = 1):
         if cost is None:
             cost = {"move": 1, "rescue": 1}
 
@@ -14,6 +14,8 @@ class RescueProblem(SearchProblem):
         self.height = len(grid)
         self.width = len(grid[0]) if self.height > 0 else 0
         self.total_civilians = total_civilians
+        self.total_civilians = total_civilians
+        self.oxygen_drain_per_civilian = oxygen_drain_per_civilian
 
     def isGoal(self, state: State) -> bool:
         traguardo = (state.robot_position == self.goal)
@@ -47,7 +49,9 @@ class RescueProblem(SearchProblem):
                     new_extinguished_fires = state.extinguished_fires
                     new_collected_extinguishers = state.collected_extinguishers
                     new_saved_people = state.saved_people
-                    step_cost = self.cost.get("move", 1) 
+                    step_cost = self.cost.get("move", 1)
+                    new_oxygen = state.oxygen
+                    new_oxygen_active = state.oxygen_active
 
                     #RACCOLTA ESTINTORE
                     if target_cell == CellType.EXTINGUISHER and new_pos not in new_collected_extinguishers:
@@ -66,6 +70,14 @@ class RescueProblem(SearchProblem):
                     if target_cell == CellType.PERSON and new_pos not in new_saved_people:
                         new_saved_people = new_saved_people | frozenset([new_pos])
                         step_cost += self.cost.get("rescue", 1)
+                        new_oxygen_active = True
+
+                    if new_oxygen_active:
+                        civilians_on_board = len(new_saved_people)
+                        new_oxygen -= (1 + civilians_on_board * self.oxygen_drain_per_civilian)
+
+                    if new_oxygen_active and new_oxygen <= 0:
+                        continue
 
                     new_battery -= step_cost
 
@@ -76,7 +88,9 @@ class RescueProblem(SearchProblem):
                         extinguisher_charges=new_charges,
                         saved_people=new_saved_people,
                         extinguished_fires=new_extinguished_fires,
-                        collected_extinguishers=new_collected_extinguishers
+                        collected_extinguishers=new_collected_extinguishers,
+                        oxygen=new_oxygen,
+                        oxygen_active=new_oxygen_active
                     )
                     
                     successors.append((action_name, new_state, step_cost))

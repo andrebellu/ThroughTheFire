@@ -13,8 +13,13 @@
     let strumentoAttivo = $state('Muro');
     let livelloAttivoId = $state(null);
     let status = $state('🟢 Griglia pulita');
+
     let batteriaCorrente = $state(100);
     let batteryTrace = $state([]);
+
+    let oxygenTrace = $state([]);
+    let ossigenoCorrente = $state(100);
+
     let searchTimeMs = $state(0);
 
     let currentStep = $state(-1)
@@ -148,6 +153,10 @@
             }
         }
 
+        if (Array.isArray(oxygenTrace) && oxygenTrace.length > currentStep) {
+            ossigenoCorrente = oxygenTrace[currentStep];
+        }
+
         setTimeout(runPlan, playbackSpeed);
     }
 
@@ -220,6 +229,7 @@
 
                 batteryTrace = Array.isArray(data.battery_trace) ? data.battery_trace : [];
                 searchTimeMs = typeof data.search_time_ms === 'number' ? data.search_time_ms : 0;
+                oxygenTrace = Array.isArray(data.oxygen_trace) ? data.oxygen_trace : [];
 
                 if (typeof data.battery_start === 'number') {
                     batteriaCorrente = data.battery_start;
@@ -282,6 +292,8 @@
 
             <PlaybackBar
                     {batteriaCorrente}
+                    {ossigenoCorrente}
+                    oxygenActive={ossigenoCorrente < 100 || oxygenTrace.length > 0}
                     {searchTimeMs}
                     {status}
             />
