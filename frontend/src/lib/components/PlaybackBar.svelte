@@ -1,6 +1,7 @@
 <script>
     let {
         batteriaCorrente = 100,
+        searchTimeMs = 0,
         status = 'In attesa'
     } = $props();
 </script>
@@ -21,6 +22,10 @@
     </div>
 
     <div class="flex items-center gap-3">
+        <span class="text-xs font-semibold text-zinc-500 uppercase tracking-wider">
+            Solve {searchTimeMs.toFixed(1)} ms
+        </span>
+
         <span class="text-sm font-bold text-zinc-500 uppercase tracking-wider">Batteria</span>
 
         <div class="w-32 h-3 bg-zinc-950 rounded-full overflow-hidden border border-zinc-800">

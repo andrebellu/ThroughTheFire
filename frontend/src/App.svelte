@@ -14,8 +14,10 @@
     let livelloAttivoId = $state(null);
     let status = $state('🟢 Griglia pulita');
     let batteriaCorrente = $state(100);
+    let batteryTrace = $state([]);
+    let searchTimeMs = $state(0);
 
-    let currentStep = $state(-1);
+    let currentStep = $state(-1)
     let isPlaying = $state(false);
     let playbackSpeed = $state(500);
     let robotPos = $state(-1);
@@ -132,11 +134,20 @@
                 mappa[newPos] = 'Robot';
                 robotPos = newPos;
             }
-        } else if (step.action === 'extinguish') {
-            // logica per estinguere eventuale fuoco nella cella attuale o adiacente
         }
 
         currentStep += 1;
+
+        if (Array.isArray(batteryTrace) && batteryTrace.length > currentStep) {
+            batteriaCorrente = batteryTrace[currentStep];
+        } else {
+            if (step && step.action === 'move') {
+                batteriaCorrente = Math.max(0, batteriaCorrente - 1);
+            } else if (step && step.action === 'extinguish') {
+                batteriaCorrente = Math.max(0, batteriaCorrente - 1);
+            }
+        }
+
         setTimeout(runPlan, playbackSpeed);
     }
 
@@ -206,6 +217,16 @@
 
             if (data.success && Array.isArray(data.plan)) {
                 planSteps = normalizePlanSteps(data.plan);
+
+                batteryTrace = Array.isArray(data.battery_trace) ? data.battery_trace : [];
+                searchTimeMs = typeof data.search_time_ms === 'number' ? data.search_time_ms : 0;
+
+                if (typeof data.battery_start === 'number') {
+                    batteriaCorrente = data.battery_start;
+                } else if (typeof data.battery_remaining === 'number') {
+                    batteriaCorrente = data.battery_remaining;
+                }
+
                 const idx = findRobotIndex(mappa);
                 if (idx === -1) {
                     toast.error("No robot found on map.");
@@ -261,6 +282,7 @@
 
             <PlaybackBar
                     {batteriaCorrente}
+                    {searchTimeMs}
                     {status}
             />
         </div>

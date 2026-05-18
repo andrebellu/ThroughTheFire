@@ -11,20 +11,27 @@ SVELTE_TO_PYTHON = {
     'Arrivo': CellType.GOAL         # !TODO da implementare logica
 }
 
-def parse_map(raw_map: List[str], initial_battery: int = 100, larghezza: int = None, altezza: int = None) -> Tuple[List[List[CellType]], State, Position]:
-    grid = []           
-    exit_pos = None    
-    civilians = set()   
+def parse_map(raw_map: List[str], initial_battery: int = 100, larghezza: int = None, altezza: int = None) -> Tuple[List[List[CellType]], State, Position, int]:
+    if larghezza is None or altezza is None:
+        raise ValueError("Dimensioni mappa mancanti")
+
+    expected_len = larghezza * altezza
+    if len(raw_map) != expected_len:
+        raise ValueError(f"Dimensioni mappa non valide: attesi {expected_len} elementi, ricevuti {len(raw_map)}")
+
+    grid = []
+    exit_pos = None
+    robot_pos = None
+    civilians = set()
 
     for y in range(altezza):
-        
         row = []
-        
+
         for x in range(larghezza):
             idx = y * larghezza + x
             svelte_cell = raw_map[idx]
-            
-            pos= Position(x, y)
+
+            pos = Position(x, y)
             if svelte_cell == "Robot":
                 robot_pos = pos
             elif svelte_cell == 'Civile':
@@ -33,6 +40,8 @@ def parse_map(raw_map: List[str], initial_battery: int = 100, larghezza: int = N
                 exit_pos = pos
 
             cell_type = SVELTE_TO_PYTHON.get(svelte_cell)
+            if cell_type is None:
+                raise ValueError(f"Cella sconosciuta '{svelte_cell}' in posizione {x},{y}")
             row.append(cell_type)
 
         grid.append(row)

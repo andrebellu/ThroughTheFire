@@ -16,9 +16,7 @@ class RescueProblem(SearchProblem):
         self.total_civilians = total_civilians
 
     def isGoal(self, state: State) -> bool:
-        traguardo = (state.robot_position == self.goal)
-        all_civili = (len(state.saved_people) == self.total_civilians)
-        return traguardo and all_civili
+        return state.robot_position == self.goal
 
     def getSuccessors(self, state: State) -> list:
         successors = []
