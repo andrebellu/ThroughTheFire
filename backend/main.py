@@ -37,7 +37,7 @@ async def root():
 def manhattan_heuristic(state, goal_pos):
     return abs(state.robot_position.x - goal_pos.x) + abs(state.robot_position.y - goal_pos.y)
 
-def build_rescue_heuristic(civilian_positions: set, goal: Position):
+def build_rescue_heuristic(civilian_positions: set, goal: Any):
     def h(state, goal_pos):
         pos = state.robot_position
         unsaved = [p for p in civilian_positions if p not in state.saved_people]
