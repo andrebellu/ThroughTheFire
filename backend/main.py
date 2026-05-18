@@ -79,6 +79,7 @@ def solve_map_payload(data: MapData, verbose: bool = True):
     current_state = initial_state
     total_cost = 0
     battery_trace: list[int] = []
+    oxygen_trace: list[int] = []
 
     for action in plan:
         successors = problem.getSuccessors(current_state)
@@ -91,7 +92,8 @@ def solve_map_payload(data: MapData, verbose: bool = True):
                 total_cost += int(step_cost)
                 # Registra la batteria dopo aver eseguito l'azione
                 batt_val = getattr(current_state, "battery", None)
-                battery_trace.append(int(batt_val) if batt_val is not None else 0)
+                battery_trace.append(int(current_state.battery))
+                oxygen_trace.append(int(current_state.oxygen))
                 found = True
                 break
 
@@ -114,6 +116,7 @@ def solve_map_payload(data: MapData, verbose: bool = True):
         "saved_count": saved_count,
         "extinguisher_charges": extinguisher_charges,
         "battery_trace": battery_trace,
+        "oxygen_trace": oxygen_trace,
         "search_time_ms": search_time_ms,
         "expanded_nodes": solver.expanded,
         "plan_length": len(plan),

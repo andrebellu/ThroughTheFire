@@ -26,6 +26,8 @@ class State:
     extinguished_fires: FrozenSet[Position]
     collected_extinguishers: FrozenSet[Position]
     extinguisher_charges: int
+    oxygen: int = 100
+    oxygen_active: bool = False
     g: int = 0
     h: int = 0
 
