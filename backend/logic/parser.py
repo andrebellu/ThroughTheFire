@@ -61,4 +61,4 @@ def parse_map(raw_map: List[str], initial_battery: int = 100, larghezza: int = N
         h=0
     )
 
-    return grid, initial_state, exit_pos, len(civilians)
+    return grid, initial_state, exit_pos, len(civilians), civilians

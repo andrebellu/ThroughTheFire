@@ -37,16 +37,30 @@ async def root():
 def manhattan_heuristic(state, goal_pos):
     return abs(state.robot_position.x - goal_pos.x) + abs(state.robot_position.y - goal_pos.y)
 
+def build_rescue_heuristic(civilian_positions: set, goal: Position):
+    def h(state, goal_pos):
+        pos = state.robot_position
+        unsaved = [p for p in civilian_positions if p not in state.saved_people]
+
+        if unsaved:
+            dist_to_nearest = min(
+                abs(pos.x - p.x) + abs(pos.y - p.y) for p in unsaved
+            )
+            nearest = min(unsaved, key=lambda p: abs(pos.x - p.x) + abs(pos.y - p.y))
+            dist_nearest_to_goal = abs(nearest.x - goal_pos.x) + abs(nearest.y - goal_pos.y)
+            return dist_to_nearest + dist_nearest_to_goal
+        else:
+            return abs(pos.x - goal_pos.x) + abs(pos.y - goal_pos.y)
+
+    return h
+
 
 def solve_map_payload(data: MapData, verbose: bool = True):
     if verbose:
         print(f"map {data.w}x{data.h}")
 
-    grid, initial_state, target_pos, civilians = parse_map(
-        data.grid,
-        initial_battery=100,
-        larghezza=data.w,
-        altezza=data.h
+    grid, initial_state, target_pos, civilians, civilian_positions = parse_map(
+        data.grid, initial_battery=100, larghezza=data.w, altezza=data.h
     )
 
     if verbose:
@@ -56,7 +70,7 @@ def solve_map_payload(data: MapData, verbose: bool = True):
 
     problem = RescueProblem(init=initial_state, goal=target_pos, grid=grid, total_civilians=civilians)
 
-    solver = AStar(heuristic=manhattan_heuristic)
+    solver = AStar(heuristic=build_rescue_heuristic(civilian_positions, target_pos), w=1.5)
 
     search_start = perf_counter()
     plan = solver.solve(problem)
@@ -74,6 +88,8 @@ def solve_map_payload(data: MapData, verbose: bool = True):
 
     if verbose:
         print(f"✅ Piano Ottimale Trovato ({len(plan)} step): {plan}")
+    else:
+        print(f"X nessun piano trovato in {search_time_ms} ms")
 
     # Ricostruisco lo stato passo-passo per ottenere battery_trace
     current_state = initial_state
