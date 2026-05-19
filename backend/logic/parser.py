@@ -12,7 +12,13 @@ SVELTE_TO_PYTHON = {
 }
 
 
-def parse_map(raw_map: List[str], initial_battery: int = 100, larghezza: int = None, altezza: int = None) -> Tuple[List[List[CellType]], State, Position, int]:
+def parse_map(
+    raw_map: List[str],
+    initial_battery: int = 100,
+    initial_oxygen: int = 100,
+    larghezza: int = None,
+    altezza: int = None
+) -> Tuple[List[List[CellType]], State, Position, int, set]:
     if larghezza is None or altezza is None:
         raise ValueError("Dimensioni mappa mancanti")
 
@@ -57,6 +63,7 @@ def parse_map(raw_map: List[str], initial_battery: int = 100, larghezza: int = N
         extinguished_fires=frozenset(),
         collected_extinguishers=frozenset(),
         extinguisher_charges=0,
+        oxygen=initial_oxygen,
         g=0,
         h=0
     )

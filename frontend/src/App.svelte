@@ -16,9 +16,11 @@
 
     let batteriaCorrente = $state(100);
     let batteryTrace = $state([]);
+    let initialBattery = $state(100);
 
     let oxygenTrace = $state([]);
     let ossigenoCorrente = $state(100);
+    let initialOxygen = $state(100);
 
     let searchTimeMs = $state(0);
 
@@ -216,11 +218,26 @@
 
     async function pythonSolve() {
         try {
+            status = '⏳ Calcolo in corso...';
+
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 20000);
+
             const resp = await fetch(ENDPOINT, {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({w: larghezza, h: altezza, grid: mappa})
+                body: JSON.stringify({
+                    w: larghezza,
+                    h: altezza,
+                    grid: mappa,
+                    initial_battery: initialBattery,
+                    initial_oxygen: initialOxygen
+                }),
+                signal: controller.signal
             });
+
+            clearTimeout(timeoutId);
+
 
             const data = await resp.json();
 
@@ -256,9 +273,15 @@
                 planSteps = [];
             }
         } catch (e) {
-            toast.error("Error connecting to solver.");
+            if (e.name === 'AbortError') {
+                status = '⏱️ Timeout: mappa troppo complessa';
+                toast.error("Timeout: nessuna soluzione trovata in 30s.");
+            } else {
+                toast.error("Error connecting to solver.");
+            }
             console.error(e);
         }
+
     }
 </script>
 
@@ -270,6 +293,8 @@
     <main class="flex-1 min-h-0 flex px-6 pb-6 gap-6 overflow-hidden">
         <Sidebar
                 bind:altezza
+                bind:initialBattery
+                bind:initialOxygen
                 bind:larghezza
                 bind:livelloAttivoId
                 bind:status

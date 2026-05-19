@@ -1,5 +1,4 @@
 from .models import Position, State, CellType
-from typing import List, Set, Tuple
 from .search_problem import SearchProblem
 from dataclasses import replace
 
