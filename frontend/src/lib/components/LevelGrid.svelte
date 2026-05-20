@@ -19,7 +19,7 @@
     function schemaToMappa(schema: string) {
         const charMap: Record<string, string> = {
             '#': 'Muro', 'R': 'Robot', 'F': 'Fuoco',
-            'C': 'Civile', 'A': 'Arrivo', 'E': 'Extinguisher', '.': 'Vuoto'
+            'C': 'Civile', 'A': 'Arrivo', 'E': 'Extinguisher', '.': 'Vuoto', 'M': 'Macerie', 'P': 'Piccone'
         };
         return schema
             .trim()

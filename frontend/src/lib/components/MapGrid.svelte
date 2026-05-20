@@ -5,15 +5,12 @@
 
   let altezza = $derived(Math.max(1, Math.ceil(mappa.length / larghezza)));
 
-  // Spazio disponibile, misurato dal contenitore reale
   let boxW = $state(0);
   let boxH = $state(0);
 
-  const GAP = 4;   // gap tra le celle, px
-  const PAD = 12;  // padding interno della griglia, px
+  const GAP = 4;   
+  const PAD = 12;  
 
-  // Dimensione di una cella: il minimo tra quanto consentono larghezza e altezza,
-  // così la griglia resta quadrata e non sfora mai il contenitore.
   let cellSize = $derived.by(() => {
     if (boxW <= 0 || boxH <= 0) return 0;
     const availW = boxW - PAD * 2 - GAP * (larghezza - 1);
@@ -24,7 +21,6 @@
     return size > 0 ? size : 0;
   });
 
-  // Action: osserva le dimensioni del contenitore e le tiene aggiornate
   function misura(node) {
     const aggiorna = () => {
       const r = node.getBoundingClientRect();
@@ -65,7 +61,6 @@
   <div class="absolute inset-0 opacity-[0.03] pointer-events-none"
        style="background-image: radial-gradient(circle at 2px 2px, white 1px, transparent 0); background-size: 32px 32px;"></div>
 
-  <!-- Questo div viene misurato: occupa tutto lo spazio della section -->
   <div use:misura class="flex-1 min-h-0 w-full flex items-center justify-center z-10">
     {#if cellSize > 0}
       <div
@@ -76,7 +71,6 @@
           gap: {GAP}px;
           padding: {PAD}px;
         ">
-        <!-- TODO: fixare il fatto che puoi disegnare se disabilitato usando il drag -->
         {#each mappa as tipoCella, indice}
           <button
             type="button"

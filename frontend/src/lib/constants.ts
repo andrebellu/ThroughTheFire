@@ -5,7 +5,9 @@ export const strumenti = {
   'Civile': { img: 'CivilPixel.png',  desc: 'Target',       color: 'bg-emerald-900', activeClass: 'border-emerald-500 ring-emerald-500/30' },
   'Extinguisher' : { img: 'ext.png',  desc: 'Fire Extinguisher',       color: 'bg-red-900', activeClass: 'border-red-500 ring-red-500/30' },
   'Arrivo': { icon: '🏁',             desc: 'Finish Point', color: 'bg-emerald-900', activeClass: 'border-emerald-500 ring-emerald-500/30' },
-  'Vuoto':  { icon: '',               desc: 'Cella vuota',  color: 'bg-zinc-800/50', activeClass: '' }
+  'Vuoto':  { icon: '',               desc: 'Cella vuota',  color: 'bg-zinc-800/50', activeClass: '' },
+  'Macerie': { img: 'Rubble.png', desc: 'Ostacolo distruttibile', color: 'bg-stone-600', activeClass: 'border-stone-400 ring-stone-400/30' },
+  'Piccone': { img: 'Pickaxe.png', desc: 'Rompe macerie', color: 'bg-amber-700', activeClass: 'border-amber-500 ring-amber-500/30' },
 };
 
 export const coloriMinimap = {
@@ -15,7 +17,9 @@ export const coloriMinimap = {
   'Civile': '#34d399',
   'Extinguisher': '#ef4444',
   'Arrivo': '#fbbf24',
-  'Vuoto':  '#09090b'
+  'Vuoto':  '#09090b',
+  'Macerie': '#57534e',
+  'Piccone': '#b45309',
 };
 
 export const defaultLevels = [
@@ -30,11 +34,11 @@ export const defaultLevels = [
         `##########
         #R.......#
         ####.###.#
-        #......#.#
+        #..P...#.#
         #.####.F.#
         #C.....E.#
         #......F.#
-        ########.A`
+        ########MA`
   },
   {
     id: 2,
@@ -45,11 +49,11 @@ export const defaultLevels = [
     altezza: 10,
     schema:
         `##############
-        #R.......E...#
-        ###.####.###.#
-        #C..#F.......#
+        #R.......E..P#
+        ###.####.###M#
+        #C..#F.....MC#
         #F###.####.###
-        #.#C.......#.#
+        #.#........#.#
         #.#.######F#.#
         #..........E.#
         #F.#######.F.#
@@ -66,10 +70,10 @@ export const defaultLevels = [
         `################
         #R...F.....C...#
         #.####.###.###.#
-        #.#C...F.#.#E..#
+        #.#C...F.#M#E..#
         #.######.#.#.###
-        #......E.#...#.#
-        ######.#####.#.#
+        #P.....E.#...#.#
+        ######M#####.#.#
         #F...#.......#.#
         #.##.#####.###.#
         #.#C.F.......F.#
@@ -85,14 +89,14 @@ export const defaultLevels = [
     altezza: 14,
     schema:
         `##################
-        #R.F.........#...#
-        #.##.#######.#C#.#
+        #R.F......P..#...#
+        #.##.#######.#M#.#
         #.#C.......F.#.#.#
-        #.#.######E###.#.#
-        #.F.#C...#...F...#
-        ###.#.##.#.###E#.#
+        #.#.##########.#.#
+        #.F.MC...#...F...#
+        #####.##.#.###E#.#
         #...#..#F#...#.#.#
-        #.####.#.###.#.F.#
+        #.####.#.###.#MF.#
         #.#E...#...C.#.#.#
         #...F..###.###...#
         #.####C#...F.#.###
@@ -108,16 +112,16 @@ export const defaultLevels = [
     altezza: 15,
     schema:
         `####################
-        #R..#.....C....#...#
-        #F..#.####.###.#F#.#
+        #R..#....MCM...#P..#
+        #F..#.####M###M#F#.#
         #...#.#E.......#.#.#
         ###.#.#.######.#.#.#
         #C..F...#C...F...#.#
-        #.#######.####.###.#
+        #.#######M####M###M#
         #.......#.#E.......#
         #######.#.#.######.#
         #...F...#...#C...F.#
-        #.#######.###.####.#
+        #.#######M###.####.#
         #.#E......#......#.#
         #...F...###.C..F...#
         #..##...E.#...##...#

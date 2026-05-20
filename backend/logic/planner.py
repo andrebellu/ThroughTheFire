@@ -51,7 +51,10 @@ class RescueProblem(SearchProblem):
                     step_cost = self.cost.get("move", 1)
                     new_oxygen = state.oxygen
                     new_oxygen_active = state.oxygen_active
+                    new_has_pickaxe = state.has_pickaxe           
+                    new_cleared_rubble = state.cleared_rubble
 
+                    
                     #RACCOLTA ESTINTORE
                     if target_cell == CellType.EXTINGUISHER and new_pos not in new_collected_extinguishers:
                         new_charges += 1
@@ -78,6 +81,17 @@ class RescueProblem(SearchProblem):
                     if new_oxygen_active and new_oxygen <= 0:
                         continue
 
+                    #PICCONE
+                    elif target_cell == CellType.PICKAXE and not new_has_pickaxe:
+                        new_has_pickaxe = True
+
+                    elif target_cell == CellType.RUBBLE and new_pos not in new_cleared_rubble:
+                        if new_has_pickaxe:
+                            new_cleared_rubble = new_cleared_rubble | frozenset([new_pos])
+                            step_cost = 5 
+                        else:
+                            continue
+
                     new_battery -= step_cost
 
                     new_state = replace(
@@ -89,7 +103,9 @@ class RescueProblem(SearchProblem):
                         extinguished_fires=new_extinguished_fires,
                         collected_extinguishers=new_collected_extinguishers,
                         oxygen=new_oxygen,
-                        oxygen_active=new_oxygen_active
+                        oxygen_active=new_oxygen_active,
+                        has_pickaxe=new_has_pickaxe,        
+                        cleared_rubble=new_cleared_rubble
                     )
                     
                     successors.append((action_name, new_state, step_cost))

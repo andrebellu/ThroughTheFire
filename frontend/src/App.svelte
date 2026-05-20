@@ -66,7 +66,6 @@
         mappa = Array(larghezza * altezza).fill('Vuoto');
         livelloAttivoId = null;
         status = '🟢 Griglia pulita';
-        // clear visited trail
         visitedCells = [];
 
         toast.success("Grid cleaned");

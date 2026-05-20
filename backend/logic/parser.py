@@ -8,7 +8,9 @@ SVELTE_TO_PYTHON = {
     'Civile': CellType.PERSON,
     'Robot': CellType.EMPTY,         
     'Extinguisher': CellType.EXTINGUISHER,
-    'Arrivo': CellType.GOAL         
+    'Arrivo': CellType.GOAL,
+    'Macerie': CellType.RUBBLE,       
+    'Piccone': CellType.PICKAXE,         
 }
 
 
@@ -64,6 +66,8 @@ def parse_map(
         collected_extinguishers=frozenset(),
         extinguisher_charges=0,
         oxygen=initial_oxygen,
+        has_pickaxe=False,                  
+        cleared_rubble=frozenset(),
         g=0,
         h=0
     )
