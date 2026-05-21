@@ -1,0 +1,6 @@
+nome,difficolta,w,h,map_cells,civilians,solved,time_ms,nodes_expanded,plan_length
+Through the Smoke,Easy,10,8,80,1,True,0.47,34,22
+Through the Fire,Medium,14,10,140,2,True,5.98,550,31
+Through Hell,Hard,16,12,192,4,True,193.51,16198,63
+Ultra Hell,Ultra,18,14,252,4,True,264.07,20722,69
+Ultra Ultra Hell,Nightmare,20,15,300,5,True,5327.5,389206,94

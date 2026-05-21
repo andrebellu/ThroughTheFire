@@ -43,7 +43,8 @@ class AStar(SearchAlgorithm):
             
             if current_state not in explored:
                 explored.add(current_state)
-                
+                self.expanded += 1
+
                 successors = problem.getSuccessors(current_state)
                 
                 for action, next_state, step_cost in successors:
