@@ -1,11 +1,10 @@
 from .models import Position, State, CellType
-from typing import List, Set, Tuple
 from .search_problem import SearchProblem
 from dataclasses import replace
 
 
 class RescueProblem(SearchProblem):
-    def __init__(self, init: State, goal: Position, grid: list[list[CellType]], cost: dict = None):
+    def __init__(self, init: State, goal: Position, grid: list[list[CellType]],total_civilians: int,cost: dict = None, oxygen_drain_per_civilian: int = 1):
         if cost is None:
             cost = {"move": 1, "rescue": 1}
 
@@ -13,9 +12,14 @@ class RescueProblem(SearchProblem):
         self.grid = grid
         self.height = len(grid)
         self.width = len(grid[0]) if self.height > 0 else 0
+        self.total_civilians = total_civilians
+        self.total_civilians = total_civilians
+        self.oxygen_drain_per_civilian = oxygen_drain_per_civilian
 
     def isGoal(self, state: State) -> bool:
-        return self.goal in state.saved_people
+        traguardo = (state.robot_position == self.goal)
+        all_civili = (len(state.saved_people) == self.total_civilians)
+        return traguardo and all_civili
 
     def getSuccessors(self, state: State) -> list:
         successors = []
@@ -26,16 +30,6 @@ class RescueProblem(SearchProblem):
         x = state.robot_position.x
         y = state.robot_position.y
 
-
-        if state.robot_position == self.goal and self.goal not in state.saved_people:
-            new_state = replace(
-                state,
-                saved_people=state.saved_people | frozenset([self.goal]),
-                battery=state.battery - self.cost.get("rescue", 1)
-            )
-            successors.append(("RESCUE", new_state, self.cost.get("rescue", 1)))
-
-
         moves = {
             "su": Position(x, y - 1),
             "giù": Position(x, y + 1),
@@ -45,13 +39,76 @@ class RescueProblem(SearchProblem):
 
         for action_name, new_pos in moves.items():
             if 0 <= new_pos.y < self.height and 0 <= new_pos.x < self.width:
-                if self.grid[new_pos.y][new_pos.x] != CellType.WALL:
+                target_cell = self.grid[new_pos.y][new_pos.x]
+                
+                if target_cell != CellType.WALL:
+                    
+                    new_battery = state.battery
+                    new_charges = state.extinguisher_charges
+                    new_extinguished_fires = state.extinguished_fires
+                    new_collected_extinguishers = state.collected_extinguishers
+                    new_saved_people = state.saved_people
+                    step_cost = self.cost.get("move", 1)
+                    new_oxygen = state.oxygen
+                    new_oxygen_active = state.oxygen_active
+                    new_has_pickaxe = state.has_pickaxe           
+                    new_cleared_rubble = state.cleared_rubble
+
+                    
+                    #RACCOLTA ESTINTORE
+                    if target_cell == CellType.EXTINGUISHER and new_pos not in new_collected_extinguishers:
+                        new_charges += 1
+                        new_collected_extinguishers = new_collected_extinguishers | frozenset([new_pos])
+                        
+                    # ATTRAVERSAMENTO FUOCO
+                    elif target_cell == CellType.FIRE and new_pos not in new_extinguished_fires:
+                        if new_charges > 0:
+                            new_charges -= 1
+                            new_extinguished_fires = new_extinguished_fires | frozenset([new_pos])
+                        else:
+                            step_cost = 10 
+                    
+                    # SALVATAGGIO CIVILE 
+                    if target_cell == CellType.PERSON and new_pos not in new_saved_people:
+                        new_saved_people = new_saved_people | frozenset([new_pos])
+                        step_cost += self.cost.get("rescue", 1)
+                        new_oxygen_active = True
+
+                    if new_oxygen_active:
+                        civilians_on_board = len(new_saved_people)
+                        new_oxygen -= (1 + civilians_on_board * self.oxygen_drain_per_civilian)
+
+                    if new_oxygen_active and new_oxygen <= 0:
+                        continue
+
+                    #PICCONE
+                    elif target_cell == CellType.PICKAXE and not new_has_pickaxe:
+                        new_has_pickaxe = True
+
+                    elif target_cell == CellType.RUBBLE and new_pos not in new_cleared_rubble:
+                        if new_has_pickaxe:
+                            new_cleared_rubble = new_cleared_rubble | frozenset([new_pos])
+                            step_cost = 5 
+                        else:
+                            continue
+
+                    new_battery -= step_cost
+
                     new_state = replace(
                         state,
                         robot_position=new_pos,
-                        battery=state.battery - self.cost.get("move", 1)
+                        battery=new_battery,
+                        extinguisher_charges=new_charges,
+                        saved_people=new_saved_people,
+                        extinguished_fires=new_extinguished_fires,
+                        collected_extinguishers=new_collected_extinguishers,
+                        oxygen=new_oxygen,
+                        oxygen_active=new_oxygen_active,
+                        has_pickaxe=new_has_pickaxe,        
+                        cleared_rubble=new_cleared_rubble
                     )
-                    successors.append((action_name, new_state, self.cost.get("move", 1)))
+                    
+                    successors.append((action_name, new_state, step_cost))
 
         return successors
 

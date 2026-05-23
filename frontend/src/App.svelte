@@ -5,6 +5,7 @@
     import {appState} from "$lib/runes.svelte.js";
     import {Toaster} from "$lib/components/ui/sonner/index.js";
     import {toast} from "svelte-sonner";
+    import PlaybackBar from "./lib/components/PlaybackBar.svelte";
 
     const ENDPOINT = "http://localhost:8000/solve";
     let larghezza = $state(12);
@@ -13,7 +14,17 @@
     let livelloAttivoId = $state(null);
     let status = $state('🟢 Griglia pulita');
 
-    let currentStep = $state(-1);
+    let batteriaCorrente = $state(100);
+    let batteryTrace = $state([]);
+    let initialBattery = $state(100);
+
+    let oxygenTrace = $state([]);
+    let ossigenoCorrente = $state(100);
+    let initialOxygen = $state(100);
+
+    let searchTimeMs = $state(0);
+
+    let currentStep = $state(-1)
     let isPlaying = $state(false);
     let playbackSpeed = $state(500);
     let robotPos = $state(-1);
@@ -55,7 +66,6 @@
         mappa = Array(larghezza * altezza).fill('Vuoto');
         livelloAttivoId = null;
         status = '🟢 Griglia pulita';
-        // clear visited trail
         visitedCells = [];
 
         toast.success("Grid cleaned");
@@ -130,11 +140,24 @@
                 mappa[newPos] = 'Robot';
                 robotPos = newPos;
             }
-        } else if (step.action === 'extinguish') {
-            // logica per estinguere eventuale fuoco nella cella attuale o adiacente
         }
 
         currentStep += 1;
+
+        if (Array.isArray(batteryTrace) && batteryTrace.length > currentStep) {
+            batteriaCorrente = batteryTrace[currentStep];
+        } else {
+            if (step && step.action === 'move') {
+                batteriaCorrente = Math.max(0, batteriaCorrente - 1);
+            } else if (step && step.action === 'extinguish') {
+                batteriaCorrente = Math.max(0, batteriaCorrente - 1);
+            }
+        }
+
+        if (Array.isArray(oxygenTrace) && oxygenTrace.length > currentStep) {
+            ossigenoCorrente = oxygenTrace[currentStep];
+        }
+
         setTimeout(runPlan, playbackSpeed);
     }
 
@@ -194,16 +217,42 @@
 
     async function pythonSolve() {
         try {
+            status = '⏳ Calcolo in corso...';
+
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 20000);
+
             const resp = await fetch(ENDPOINT, {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({w: larghezza, h: altezza, grid: mappa})
+                body: JSON.stringify({
+                    w: larghezza,
+                    h: altezza,
+                    grid: mappa,
+                    initial_battery: initialBattery,
+                    initial_oxygen: initialOxygen
+                }),
+                signal: controller.signal
             });
+
+            clearTimeout(timeoutId);
+
 
             const data = await resp.json();
 
             if (data.success && Array.isArray(data.plan)) {
                 planSteps = normalizePlanSteps(data.plan);
+
+                batteryTrace = Array.isArray(data.battery_trace) ? data.battery_trace : [];
+                searchTimeMs = typeof data.search_time_ms === 'number' ? data.search_time_ms : 0;
+                oxygenTrace = Array.isArray(data.oxygen_trace) ? data.oxygen_trace : [];
+
+                if (typeof data.battery_start === 'number') {
+                    batteriaCorrente = data.battery_start;
+                } else if (typeof data.battery_remaining === 'number') {
+                    batteriaCorrente = data.battery_remaining;
+                }
+
                 const idx = findRobotIndex(mappa);
                 if (idx === -1) {
                     toast.error("No robot found on map.");
@@ -223,20 +272,28 @@
                 planSteps = [];
             }
         } catch (e) {
-            toast.error("Error connecting to solver.");
+            if (e.name === 'AbortError') {
+                status = '⏱️ Timeout: mappa troppo complessa';
+                toast.error("Timeout: nessuna soluzione trovata in 30s.");
+            } else {
+                toast.error("Error connecting to solver.");
+            }
             console.error(e);
         }
+
     }
 </script>
 
 <Toaster position="top-center"/>
 
-<div class="h-screen w-full bg-zinc-950 text-zinc-100 flex flex-col font-sans selection:bg-orange-500/30">
+<div class="h-screen w-full bg-zinc-950 text-zinc-100 flex flex-col font-sans selection:bg-orange-500/30 overflow-hidden">
     <Header/>
 
-    <main class="flex-1 flex px-6 pb-6 gap-6 overflow-hidden">
+    <main class="flex-1 min-h-0 flex px-6 pb-6 gap-6 overflow-hidden">
         <Sidebar
                 bind:altezza
+                bind:initialBattery
+                bind:initialOxygen
                 bind:larghezza
                 bind:livelloAttivoId
                 bind:status
@@ -247,13 +304,23 @@
                 {pythonSolve}
                 {saveInLocalStorage}
         />
-        <MapGrid
-                bind:mappa
-                {isPlaying}
-                {larghezza}
-                {robotPos}
-                {strumentoAttivo}
-                {visitedCells}
-        />
+        <div class="flex-1 min-w-0 min-h-0 flex flex-col">
+            <MapGrid
+                    bind:mappa
+                    {isPlaying}
+                    {larghezza}
+                    {robotPos}
+                    {strumentoAttivo}
+                    {visitedCells}
+            />
+
+            <PlaybackBar
+                    {batteriaCorrente}
+                    {ossigenoCorrente}
+                    oxygenActive={ossigenoCorrente < 100 || oxygenTrace.length > 0}
+                    {searchTimeMs}
+                    {status}
+            />
+        </div>
     </main>
 </div>

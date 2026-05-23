@@ -9,6 +9,8 @@ class CellType(Enum):
     PERSON = 3
     EXTINGUISHER = 4
     GOAL = 9
+    RUBBLE = 5
+    PICKAXE = 6
 
 @dataclass(frozen=True, order=True)
 class Position:
@@ -25,7 +27,11 @@ class State:
     saved_people: FrozenSet[Position]
     extinguished_fires: FrozenSet[Position]
     collected_extinguishers: FrozenSet[Position]
+    has_pickaxe: bool                       
+    cleared_rubble: FrozenSet[Position]
     extinguisher_charges: int
+    oxygen: int = 100
+    oxygen_active: bool = False
     g: int = 0
     h: int = 0
 
