@@ -5,6 +5,8 @@
 **Anno Accademico:** 2025/2026  
 **Università:** Università degli Studi di Brescia
 
+![](https://github.com/andrebellu/ThroughTheFire/blob/fix-Priorit%C3%A0Civili/dashboard.png)
+
 ---
 
 ## Descrizione del Progetto
