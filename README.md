@@ -1,59 +1,99 @@
-# Through The Fire - Proposta di Progetto
+# Through The Fire
 
-**Candidati:** Andrea Bellu, Calvin You
-
-**Corso:** Sistemi Intelligenti
-
-**Anno Accademico:** 2025/2026
-
----
-
-## Obiettivi del progetto
-Il progetto *Through The Fire* si pone l'obiettivo di risolvere scenari fittizi di emergenza sfruttando algoritmi di ricerca. L'idea è quella di modellare un agente robotico di soccorso incaricato di salvare dei civili in un ambiente più o meno pericoloso.
-
-## Struttura Concettuale
-
-### Scenario
-Il sistema distingue due tipologie di emergenza che influenzano il dominio:
-* **Incendio**: presenza di fumo o fiamme che aumentano il costo di percorrenza o bloccano aree.
-* **Terremoto**: crolli strutturali che obbligano il robot ad effettuare azioni fisiche di rimozione.
-
-### Entità Dinamiche
-* **Agente robotico**: caratterizzato da batteria limitata (percorso di andata e ritorno), capacità di trasporto limitata (numero massimo di civili trasportabili contemporaneamente) e gestione dell'ossigeno per le persone a bordo.
-* **Civili**: entità da salvare con diverse priorità (feriti e illesi).
-
-### Ambiente di simulazione
-* **Mappe Standard**: livelli con difficoltà predefinita (*Peaceful, Easy, Normal, Hard, HardCore*).
-* **Mappe Custom**: l'utente è libero di gestire la griglia inserendo ostacoli, muri e zone di fuoco a piacimento.
-
-### Vincoli e Goal State
-* **Vincoli**: gestione dell'ossigeno residuo per i civili e l'autonomia della batteria.
-* **Goal State**: l'obiettivo dell'agente è portare tutti i civili in salvo entro un tempo massimo prestabilito.
+**Autori:** Andrea Bellu, Calvin You  
+**Corso:** Sistemi Intelligenti  
+**Anno Accademico:** 2025/2026  
+**Università:** Università degli Studi di Brescia
 
 ---
 
-## Azioni (Modellazione STRIPS)
-* `Move`: spostamento tra celle adiacenti con consumo di batteria.
-* `Rescue`: caricamento di un civile a bordo (precondizione: capacità residua > 0).
-* `Clear Path`: rimozione delle macerie da una cella adiacente.
-* `Extinguish`: spegnimento di un incendio (può richiedere una risorsa aggiuntiva come l'estintore).
-* `Drop`: rilascio dei civili nel punto di raccolta (Goal state).
+## Descrizione del Progetto
+**Through the Fire** è un'applicazione web interattiva focalizzata sulla pianificazione deterministica di un agente autonomo in scenari di emergenza. 
+
+Il sistema simula un robot di soccorso che deve navigare all'interno di una mappa per trovare e salvare dei civili intrappolati, per poi condurli verso l'uscita. L'ambiente è ostile: il robot è limitato da **batteria** (che si consuma muovendosi o attraversando pericoli) e **ossigeno** (che si consuma progressivamente in base al numero di civili soccorsi). 
+
+Il cuore logico del progetto è un motore decisionale basato su **Weighted A*** associato a un'euristica ammissibile custom (Distanza di Manhattan multi-obiettivo). L'algoritmo non cerca solo la via d'uscita, ma risolve simultaneamente il problema del salvataggio dei civili (variante TSP) e l'ottimizzazione delle risorse (raccolta estintori e distruzione ostacoli).
+
+## Stack Tecnologico
+Il progetto adotta un'architettura disaccoppiata Client-Server:
+* **Frontend:** Svelte 5 (Vite) - gestisce l'editor interattivo della mappa, la serializzazione dello scenario e il rendering reattivo (senza Virtual DOM) delle animazioni.
+* **Backend:** Python 3 (FastAPI + Uvicorn) - riceve lo stato iniziale, istanzia lo spazio degli stati immutabile ed esegue l'algoritmo di ricerca per trovare il piano d'azione ottimale.
 
 ---
 
-## Workflow
-Il progetto segue un'architettura *Client-Server* per separare la logica di pianificazione dalla visualizzazione grafica:
+## Guida all'Installazione e Avvio
 
-### Frontend (Svelte)
-* Consente la configurazione della mappa tramite editor visuale o scenari predefiniti.
-* Genera un payload JSON con la topologia della griglia e lo stato iniziale delle entità.
-* Riceve il piano d'azione dal backend e mostra i risultati tramite una simulazione in tempo reale.
+Il progetto richiede l'avvio separato dei due ambienti (Frontend e Backend). Assicurati di avere installati **Node.js** (npm) e **Python 3.10+**.
 
-### Backend (Python - FastAPI)
-* Espone endpoint dedicati per la ricezione delle richieste di planning.
-* **Parser**: traduce il JSON dal frontend e inizializza gli stati logici.
-* **Solver**: trova il percorso ottimale tramite algoritmi di ricerca e una formula euristica custom (distanza di Manhattan pesata rispetto ai vincoli).
+### 1. Avvio del Backend (Python)
+Apri un terminale e posizionati nella cartella `backend`:
 
-### Output e Analisi
-* Il sistema restituisce il risultato e i dati sulle prestazioni dell'esecuzione (tempo, memoria, nodi).
-* I dati vengono utilizzati per condurre un'analisi comportamentale dell'algoritmo al variare degli scenari.
+```bash
+cd backend
+```
+Crea e attiva un ambiente virtuale (consigliato):
+```Bash
+
+# Su Windows:
+python -m venv .venv
+.venv\Scripts\activate
+
+# Su macOS/Linux:
+python3 -m venv .venv
+source .venv/bin/activate
+```
+Installa le dipendenze:
+```Bash
+
+pip install -r requirements.txt
+```
+
+Tornare nella cartella principale del progetto e avviare il server FastAPI tramite Uvicorn:
+```Bash
+
+# Il server partirà di default su [http://127.0.0.1:8000](http://127.0.0.1:8000)
+cd ..
+uvicorn backend.main:app --host 0.0.0.0 --port 8000
+```
+### 2. Avvio del Frontend (Svelte)
+
+Apri un nuovo terminale e posizionati nella cartella frontend:
+```Bash
+
+cd frontend
+```
+Installa i pacchetti Node:
+```Bash
+
+npm install
+```
+Avvia il server di sviluppo Vite:
+```bash
+
+# Il client partirà di default su http://localhost:5173
+npm run dev
+```
+Una volta avviati entrambi i server, apri il browser all'indirizzo del frontend per utilizzare l'applicazione.
+## Funzionalità Principali
+
+- Custom Level Editor: disegna la tua mappa piazzando Muri, Fuoco, Civili, Estintori e Macerie. Le mappe create posso essere salvate nel LocalStorage del tuo browser cliccando il tasto "Salva".
+
+- Livelli Benchmark: 5 livelli predefiniti (da Easy a Nightmare) per testare le prestazioni e la scalabilità dell'algoritmo.
+
+- Gestione Risorse:
+
+  - Batteria: decrementa a ogni passo. Attraversare il fuoco senza estintore costa molto di più di un passo normale.
+
+  - Ossigeno: inizia a consumarsi solo dopo aver recuperato il primo civile (introduce un vincolo temporale).
+
+- Motore di Animazione: sincronizzazione visiva del piano calcolato dal backend.
+
+## L'Algoritmo (Weighted A*)
+
+L'algoritmo risolutivo affronta il fenomeno della State Space Explosion causato dalle molteplici variabili (civili, fuochi, estintori) attraverso:
+
+- Stati Immutabili (Frozen Dataclasses): per bloccare la re-immissione di nodi identici nella coda di priorità.
+
+- Euristica Custom Multi-Target: stima il costo prendendo il civile "più distante" (massimizzando il lower-bound pur restando ammissibile).
+
+- Pesi Euristici (W=2): sacrifica la garanzia dell'ottimalità assoluta in favore di tempi di calcolo real-time, evitando timeout computazionali (impostato a max 25 secondi) su mappe complesse.
